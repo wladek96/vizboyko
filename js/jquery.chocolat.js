@@ -1,1 +1,737 @@
-!function(a){"object"==typeof module&&"object"==typeof module.exports?module.exports=a(require("jquery"),window,document):a(jQuery,window,document)}(function(a,b,c,d){function f(b,c){var d=this;return this.settings=c,this.elems={},this.element=b,this._cssClasses=["chocolat-open","chocolat-in-container","chocolat-cover","chocolat-zoomable","chocolat-zoomed"],!this.settings.setTitle&&b.data("chocolat-title")&&(this.settings.setTitle=b.data("chocolat-title")),this.element.find(this.settings.imageSelector).each(function(){d.settings.images.push({title:a(this).attr("title"),src:a(this).attr(d.settings.imageSource),height:!1,width:!1})}),this.element.find(this.settings.imageSelector).each(function(b){a(this).off("click.chocolat").on("click.chocolat",function(a){d.init(b),a.preventDefault()})}),this}var e=0;a.extend(f.prototype,{init:function(a){return this.settings.initialized||(this.setDomContainer(),this.markup(),this.events(),this.settings.lastImage=this.settings.images.length-1,this.settings.initialized=!0),this.settings.afterInitialize.call(this),this.load(a)},preload:function(b){var c=a.Deferred();if(void 0!==this.settings.images[b]){var d=new Image;return d.onload=function(){c.resolve(d)},d.src=this.settings.images[b].src,c}},load:function(b){var c=this;if(this.settings.fullScreen&&this.openFullScreen(),this.settings.currentImage!==b){this.elems.overlay.fadeIn(this.settings.duration),this.elems.wrapper.fadeIn(this.settings.duration),this.elems.domContainer.addClass("chocolat-open"),this.settings.timer=setTimeout(function(){void 0!==c.elems&&a.proxy(c.elems.loader.fadeIn(),c)},this.settings.duration);var d=this.preload(b).then(function(a){return c.place(b,a)}).then(function(a){return c.appear(b)}).then(function(a){c.zoomable(),c.settings.afterImageLoad.call(c)}),e=b+1;return void 0!==this.settings.images[e]&&this.preload(e),d}},place:function(a,b){var d,c=this;return this.settings.currentImage=a,this.description(),this.pagination(),this.arrows(),this.storeImgSize(b,a),d=this.fit(a,c.elems.wrapper),this.center(d.width,d.height,d.left,d.top,0)},center:function(a,b,c,d,e){return this.elems.content.css("overflow","visible").animate({width:a,height:b,left:c,top:d},e).promise()},appear:function(a){var b=this;clearTimeout(this.settings.timer),this.elems.loader.stop().fadeOut(300,function(){b.elems.img.attr("src",b.settings.images[a].src)})},fit:function(b,c){var d,e,f=this.settings.images[b].height,g=this.settings.images[b].width,h=a(c).height(),i=a(c).width(),j=this.getOutMarginH(),k=this.getOutMarginW(),l=i-k,m=h-j,n=m/l,o=h/i,p=f/g;return"cover"==this.settings.imageSize?p<o?(d=h,e=d/p):(e=i,d=e*p):"native"==this.settings.imageSize?(d=f,e=g):(p>n?(d=m,e=d/p):(e=l,d=e*p),"default"===this.settings.imageSize&&(e>=g||d>=f)&&(e=g,d=f)),{height:d,width:e,top:(h-d)/2,left:(i-e)/2}},change:function(a){this.zoomOut(0),this.zoomable();var b=this.settings.currentImage+parseInt(a);if(b>this.settings.lastImage){if(this.settings.loop)return this.load(0)}else{if(!(b<0))return this.load(b);if(this.settings.loop)return this.load(this.settings.lastImage)}},arrows:function(){this.settings.loop?a([this.elems.left[0],this.elems.right[0]]).addClass("active"):this.settings.linkImages?(this.settings.currentImage==this.settings.lastImage?this.elems.right.removeClass("active"):this.elems.right.addClass("active"),0===this.settings.currentImage?this.elems.left.removeClass("active"):this.elems.left.addClass("active")):a([this.elems.left[0],this.elems.right[0]]).removeClass("active")},description:function(){var a=this;this.elems.description.html(a.settings.images[a.settings.currentImage].title)},pagination:function(){var a=this,b=this.settings.lastImage+1,c=this.settings.currentImage+1;this.elems.pagination.html(c+" "+a.settings.separator2+b)},storeImgSize:function(a,b){void 0!==a&&(this.settings.images[b].height&&this.settings.images[b].width||(this.settings.images[b].height=a.height,this.settings.images[b].width=a.width))},close:function(){if(this.settings.fullscreenOpen)return void this.exitFullScreen();var b=[this.elems.overlay[0],this.elems.loader[0],this.elems.wrapper[0]],c=this,d=a.when(a(b).fadeOut(200)).done(function(){c.elems.domContainer.removeClass("chocolat-open")});return this.settings.currentImage=!1,d},destroy:function(){this.element.removeData(),this.element.find(this.settings.imageSelector).off("click.chocolat"),this.settings.initialized&&(this.settings.fullscreenOpen&&this.exitFullScreen(),this.settings.currentImage=!1,this.settings.initialized=!1,this.elems.domContainer.removeClass(this._cssClasses.join(" ")),this.elems.wrapper.remove())},getOutMarginW:function(){return this.elems.left.outerWidth(!0)+this.elems.right.outerWidth(!0)},getOutMarginH:function(){return this.elems.top.outerHeight(!0)+this.elems.bottom.outerHeight(!0)},markup:function(){this.elems.domContainer.addClass("chocolat-open "+this.settings.className),"cover"==this.settings.imageSize&&this.elems.domContainer.addClass("chocolat-cover"),this.settings.container!==b&&this.elems.domContainer.addClass("chocolat-in-container"),this.elems.wrapper=a("<div/>",{class:"chocolat-wrapper",id:"chocolat-content-"+this.settings.setIndex}).appendTo(this.elems.domContainer),this.elems.overlay=a("<div/>",{class:"chocolat-overlay"}).appendTo(this.elems.wrapper),this.elems.loader=a("<div/>",{class:"chocolat-loader"}).appendTo(this.elems.wrapper),this.elems.content=a("<div/>",{class:"chocolat-content"}).appendTo(this.elems.wrapper),this.elems.img=a("<img/>",{class:"chocolat-img",src:""}).appendTo(this.elems.content),this.elems.top=a("<div/>",{class:"chocolat-top"}).appendTo(this.elems.wrapper),this.elems.left=a("<div/>",{class:"chocolat-left"}).appendTo(this.elems.wrapper),this.elems.right=a("<div/>",{class:"chocolat-right"}).appendTo(this.elems.wrapper),this.elems.bottom=a("<div/>",{class:"chocolat-bottom"}).appendTo(this.elems.wrapper),this.elems.close=a("<span/>",{class:"chocolat-close"}).appendTo(this.elems.top),this.elems.fullscreen=a("<span/>",{class:"chocolat-fullscreen"}).appendTo(this.elems.bottom),this.elems.description=a("<span/>",{class:"chocolat-description"}).appendTo(this.elems.bottom),this.elems.pagination=a("<span/>",{class:"chocolat-pagination"}).appendTo(this.elems.bottom),this.elems.setTitle=a("<span/>",{class:"chocolat-set-title",html:this.settings.setTitle}).appendTo(this.elems.bottom),this.settings.afterMarkup.call(this)},openFullScreen:function(){var a=this.elems.wrapper[0];a.requestFullscreen?(this.settings.fullscreenOpen=!0,a.requestFullscreen()):a.mozRequestFullScreen?(this.settings.fullscreenOpen=!0,a.mozRequestFullScreen()):a.webkitRequestFullscreen?(this.settings.fullscreenOpen=!0,a.webkitRequestFullscreen()):a.msRequestFullscreen?(a.msRequestFullscreen(),this.settings.fullscreenOpen=!0):this.settings.fullscreenOpen=!1},exitFullScreen:function(){c.exitFullscreen?(c.exitFullscreen(),this.settings.fullscreenOpen=!1):c.mozCancelFullScreen?(c.mozCancelFullScreen(),this.settings.fullscreenOpen=!1):c.webkitExitFullscreen?(c.webkitExitFullscreen(),this.settings.fullscreenOpen=!1):this.settings.fullscreenOpen=!0},events:function(){var d=this;a(c).off("keydown.chocolat").on("keydown.chocolat",function(a){d.settings.initialized&&(37==a.keyCode?d.change(-1):39==a.keyCode?d.change(1):27==a.keyCode&&d.close())}),this.elems.wrapper.find(".chocolat-right").off("click.chocolat").on("click.chocolat",function(){d.change(1)}),this.elems.wrapper.find(".chocolat-left").off("click.chocolat").on("click.chocolat",function(){return d.change(-1)}),a([this.elems.overlay[0],this.elems.close[0]]).off("click.chocolat").on("click.chocolat",function(){return d.close()}),this.elems.fullscreen.off("click.chocolat").on("click.chocolat",function(){if(d.settings.fullscreenOpen)return void d.exitFullScreen();d.openFullScreen()}),d.settings.backgroundClose&&this.elems.overlay.off("click.chocolat").on("click.chocolat",function(){return d.close()}),this.elems.wrapper.off("click.chocolat").on("click.chocolat",function(a){return d.zoomOut(a)}),this.elems.wrapper.find(".chocolat-img").off("click.chocolat").on("click.chocolat",function(a){if(null===d.settings.initialZoomState&&d.elems.domContainer.hasClass("chocolat-zoomable"))return a.stopPropagation(),d.zoomIn(a)}),this.elems.wrapper.mousemove(function(b){if(null!==d.settings.initialZoomState&&!d.elems.img.is(":animated")){var c=a(this).offset(),e=a(this).height(),f=a(this).width(),g=d.settings.images[d.settings.currentImage],h=g.width,i=g.height,j=[b.pageX-f/2-c.left,b.pageY-e/2-c.top],k=0;if(h>f){var l=d.settings.zoomedPaddingX(h,f);k=j[0]/(f/2),k*=(h-f)/2+l}var m=0;if(i>e){var n=d.settings.zoomedPaddingY(i,e);m=j[1]/(e/2),m*=(i-e)/2+n}var o={"margin-left":-k+"px","margin-top":-m+"px"};void 0!==b.duration?a(d.elems.img).stop(!1,!0).animate(o,b.duration):a(d.elems.img).stop(!1,!0).css(o)}}),a(b).on("resize",function(){d.settings.initialized&&d.debounce(50,function(){var a=d.fit(d.settings.currentImage,d.elems.wrapper);d.center(a.width,a.height,a.left,a.top,0),d.zoomable()})})},zoomable:function(){var a=this.settings.images[this.settings.currentImage],b=this.elems.wrapper.width(),c=this.elems.wrapper.height(),d=!(!this.settings.enableZoom||!(a.width>b||a.height>c)),e=this.elems.img.width()>a.width||this.elems.img.height()>a.height;d&&!e?this.elems.domContainer.addClass("chocolat-zoomable"):this.elems.domContainer.removeClass("chocolat-zoomable")},zoomIn:function(b){this.settings.initialZoomState=this.settings.imageSize,this.settings.imageSize="native";var c=a.Event("mousemove");c.pageX=b.pageX,c.pageY=b.pageY,c.duration=this.settings.duration,this.elems.wrapper.trigger(c),this.elems.domContainer.addClass("chocolat-zoomed");var d=this.fit(this.settings.currentImage,this.elems.wrapper);return this.center(d.width,d.height,d.left,d.top,this.settings.duration)},zoomOut:function(a,b){if(null!==this.settings.initialZoomState){b=b||this.settings.duration,this.settings.imageSize=this.settings.initialZoomState,this.settings.initialZoomState=null,this.elems.img.animate({margin:0},b),this.elems.domContainer.removeClass("chocolat-zoomed");var c=this.fit(this.settings.currentImage,this.elems.wrapper);return this.center(c.width,c.height,c.left,c.top,b)}},setDomContainer:function(){this.settings.container===b?this.elems.domContainer=a("body"):this.elems.domContainer=a(this.settings.container)},debounce:function(a,b){clearTimeout(this.settings.timerDebounce),this.settings.timerDebounce=setTimeout(function(){b()},a)},api:function(){var a=this;return{open:function(b){return b=parseInt(b)||0,a.init(b)},close:function(){return a.close()},next:function(){return a.change(1)},prev:function(){return a.change(-1)},goto:function(b){return a.open(b)},current:function(){return a.settings.currentImage},place:function(){return a.place(a.settings.currentImage,a.settings.duration)},destroy:function(){return a.destroy()},set:function(b,c){return a.settings[b]=c,c},get:function(b){return a.settings[b]},getElem:function(b){return a.elems[b]}}}});var g={container:b,imageSelector:".chocolat-image",className:"",imageSize:"default",initialZoomState:null,fullScreen:!1,loop:!1,linkImages:!0,duration:300,setTitle:"",separator2:"/",setIndex:0,firstImage:0,lastImage:!1,currentImage:!1,initialized:!1,timer:!1,timerDebounce:!1,images:[],enableZoom:!0,imageSource:"href",afterInitialize:function(){},afterMarkup:function(){},afterImageLoad:function(){},zoomedPaddingX:function(a,b){return 0},zoomedPaddingY:function(a,b){return 0}};a.fn.Chocolat=function(b){return this.each(function(){e++;var c=a.extend(!0,{},g,b,{setIndex:e});a.data(this,"chocolat")||a.data(this,"chocolat",new f(a(this),c))})}});
+(function (factory) {
+    if(typeof module === "object" && typeof module.exports === "object") {
+        module.exports = factory(require("jquery"), window, document);
+    } else {
+        factory(jQuery, window, document);
+    }
+}(function($, window, document, undefined) {
+    var calls = 0;
+
+    function Chocolat(element, settings) {
+        var that = this;
+
+        this.settings  = settings;
+        this.elems     = {};
+        this.element   = element;
+
+        this._cssClasses = [
+            'chocolat-open',
+            'chocolat-in-container',
+            'chocolat-cover',
+            'chocolat-zoomable',
+            'chocolat-zoomed'
+        ];
+
+        if (!this.settings.setTitle && element.data('chocolat-title')) {
+            this.settings.setTitle = element.data('chocolat-title');
+        }
+
+        this.element.find(this.settings.imageSelector).each(function () {
+            that.settings.images.push({
+                title  : $(this).attr('title'),
+                src    : $(this).attr(that.settings.imageSource),
+                height : false,
+                width  : false
+            });
+        });
+
+        this.element.find(this.settings.imageSelector).each(function (i) {
+            $(this).off('click.chocolat').on('click.chocolat', function(e){
+                that.init(i);
+                e.preventDefault();
+            });
+        });
+
+        return this;
+    }
+
+    $.extend(Chocolat.prototype, {
+
+        init : function(i) {
+            if (!this.settings.initialized) {
+                this.setDomContainer();
+                this.markup();
+                this.events();
+                this.settings.lastImage   = this.settings.images.length - 1;
+                this.settings.initialized = true;
+            }
+
+            this.settings.afterInitialize.call(this);
+
+            return this.load(i);
+        },
+
+        preload : function(i) {
+            var def = $.Deferred();
+
+            if (typeof this.settings.images[i] === 'undefined') {
+                return;
+            }
+            var imgLoader    = new Image();
+            imgLoader.onload = function() { def.resolve(imgLoader); };
+            imgLoader.src    = this.settings.images[i].src;
+
+            return def;
+        },
+
+        load : function(i) {
+            var that = this;
+            if (this.settings.fullScreen) {
+                this.openFullScreen();
+            }
+
+            if (this.settings.currentImage === i) {
+                return;
+            }
+
+            this.elems.overlay.fadeIn(this.settings.duration);
+            this.elems.wrapper.fadeIn(this.settings.duration);
+            this.elems.domContainer.addClass('chocolat-open');
+
+            this.settings.timer = setTimeout(function(){
+                if (typeof that.elems != 'undefined') {
+                    $.proxy(that.elems.loader.fadeIn(1000), that);
+                }
+            }, this.settings.duration);
+
+            var deferred = this.preload(i)
+                .then(function (imgLoader) {
+                    return that.place(i, imgLoader);
+                })
+                .then(function (imgLoader) {
+                    return that.appear(i);
+                })
+                .then(function (imgLoader) {
+                    that.zoomable();
+                    that.settings.afterImageLoad.call(that);
+                });
+
+            var nextIndex = i + 1;
+            if (typeof this.settings.images[nextIndex] != 'undefined') {
+                this.preload(nextIndex);
+            }
+
+            return deferred;
+        },
+
+        place : function(i, imgLoader) {
+            var that = this;
+            var fitting;
+
+            this.settings.currentImage = i;
+            this.description();
+            this.pagination();
+            this.arrows();
+
+            this.storeImgSize(imgLoader, i);
+            fitting = this.fit(i, that.elems.wrapper);
+
+            return this.center(
+                fitting.width,
+                fitting.height,
+                fitting.left,
+                fitting.top,
+                0
+            );
+        },
+
+        center : function(width, height, left, top, duration) {
+
+            return this.elems.content
+                .css('overflow', 'visible')
+                .animate({
+                    'width'  :width,
+                    'height' :height,
+                    'left'   :left,
+                    'top'    :top
+                }, duration)
+                .promise();
+        },
+
+        appear : function(i) {
+            var that = this;
+            clearTimeout(this.settings.timer);
+
+            this.elems.loader.stop().fadeOut(1000, function() {
+                that.elems.img
+                    .attr('src', that.settings.images[i].src);
+            });
+        },
+
+        fit : function(i, container) {
+            var height;
+            var width;
+
+            var imgHeight        = this.settings.images[i].height;
+            var imgWidth         = this.settings.images[i].width;
+            var holderHeight     = $(container).height();
+            var holderWidth      = $(container).width();
+            var holderOutMarginH = this.getOutMarginH();
+            var holderOutMarginW = this.getOutMarginW();
+
+            var holderGlobalWidth  = holderWidth-holderOutMarginW;
+            var holderGlobalHeight = holderHeight-holderOutMarginH;
+            var holderGlobalRatio  = (holderGlobalHeight / holderGlobalWidth);
+            var holderRatio        = (holderHeight / holderWidth);
+            var imgRatio           = (imgHeight / imgWidth);
+
+            if (this.settings.imageSize == 'cover') {
+                if (imgRatio < holderRatio) {
+                    height = holderHeight;
+                    width = height / imgRatio;
+                }
+                else {
+                    width = holderWidth;
+                    height = width * imgRatio;
+                }
+            }
+            else if (this.settings.imageSize == 'native') {
+                height = imgHeight;
+                width = imgWidth;
+            }
+            else {
+                if (imgRatio > holderGlobalRatio) {
+                    height = holderGlobalHeight;
+                    width = height / imgRatio;
+                }
+                else {
+                    width = holderGlobalWidth;
+                    height = width * imgRatio;
+                }
+                if (this.settings.imageSize === 'default' && (width >= imgWidth || height >= imgHeight)) {
+                    width = imgWidth;
+                    height = imgHeight;
+                }
+            }
+
+            return {
+                'height' : height,
+                'width'  : width,
+                'top'    : (holderHeight - height)/2,
+                'left'   : (holderWidth - width)/2
+            };
+        },
+
+        change : function(signe) {
+            this.zoomOut(0);
+            this.zoomable();
+
+            var requestedImage = this.settings.currentImage + parseInt(signe);
+            if (requestedImage > this.settings.lastImage) {
+                if (this.settings.loop) {
+                    return this.load(0);
+                }
+            }
+            else if (requestedImage < 0) {
+                if (this.settings.loop) {
+                    return this.load(this.settings.lastImage);
+                }
+            }
+            else {
+                return this.load(requestedImage);
+            }
+        },
+
+        arrows: function() {
+            if (this.settings.loop) {
+                $([this.elems.left[0],this.elems.right[0]])
+                    .addClass('active');
+            }
+            else if (this.settings.linkImages) {
+                // right
+                if (this.settings.currentImage == this.settings.lastImage) {
+                    this.elems.right.removeClass('active');
+                }
+                else {
+                    this.elems.right.addClass('active');
+                }
+                // left
+                if (this.settings.currentImage === 0) {
+                    this.elems.left.removeClass('active');
+                }
+                else {
+                    this.elems.left.addClass('active');
+                }
+            }
+            else {
+                $([this.elems.left[0],this.elems.right[0]])
+                    .removeClass('active');
+            }
+        },
+
+        description : function() {
+            var that = this;
+            this.elems.description
+                .html(that.settings.images[that.settings.currentImage].title);
+        },
+
+        pagination : function() {
+            var that      = this;
+            var last      = this.settings.lastImage + 1;
+            var position  = this.settings.currentImage + 1;
+
+            this.elems.pagination
+                .html(position + ' ' + that.settings.separator2 + last);
+        },
+
+        storeImgSize : function(img, i) {
+            if (typeof img === 'undefined') {
+                return;
+            }
+            if (!this.settings.images[i].height || !this.settings.images[i].width) {
+                this.settings.images[i].height = img.height;
+                this.settings.images[i].width  = img.width;
+            }
+        },
+
+        close : function() {
+
+            if (this.settings.fullscreenOpen) {
+                this.exitFullScreen();
+                return;
+            }
+
+            var els = [
+                this.elems.overlay[0],
+                this.elems.loader[0],
+                this.elems.wrapper[0]
+            ];
+            var that = this;
+            var def = $.when($(els).fadeOut(1000)).done(function () {
+                that.elems.domContainer.removeClass('chocolat-open');
+            });
+            this.settings.currentImage = false;
+
+            return def;
+        },
+
+        destroy : function() {
+            this.element.removeData();
+            this.element.find(this.settings.imageSelector).off('click.chocolat');
+
+            if (!this.settings.initialized) {
+                return;
+            }
+            if (this.settings.fullscreenOpen) {
+                this.exitFullScreen();
+            }
+            this.settings.currentImage = false;
+            this.settings.initialized = false;
+            this.elems.domContainer.removeClass(this._cssClasses.join(' '));
+            this.elems.wrapper.remove();
+        },
+
+        getOutMarginW : function() {
+            var left  = this.elems.left.outerWidth(true);
+            var right = this.elems.right.outerWidth(true);
+            return left + right;
+        },
+
+        getOutMarginH : function() {
+            return this.elems.top.outerHeight(true) + this.elems.bottom.outerHeight(true);
+        },
+
+        markup : function() {
+            this.elems.domContainer.addClass('chocolat-open ' + this.settings.className);
+            if (this.settings.imageSize == 'cover') {
+                this.elems.domContainer.addClass('chocolat-cover');
+            }
+            if (this.settings.container !== window) {
+                this.elems.domContainer.addClass('chocolat-in-container');
+            }
+
+            this.elems.wrapper = $('<div/>', {
+                'class' : 'chocolat-wrapper',
+                'id' : 'chocolat-content-' + this.settings.setIndex
+            }).appendTo(this.elems.domContainer);
+
+            this.elems.overlay = $('<div/>', {
+                'class' : 'chocolat-overlay'
+            }).appendTo(this.elems.wrapper);
+
+            this.elems.loader = $('<div/>', {
+                'class' : 'chocolat-loader'
+            }).appendTo(this.elems.wrapper);
+
+            this.elems.content = $('<div/>', {
+                'class' : 'chocolat-content',
+            }).appendTo(this.elems.wrapper);
+
+            this.elems.img = $('<img/>', {
+                'class' : 'chocolat-img',
+                'src' : ''
+            }).appendTo(this.elems.content);
+
+            this.elems.top = $('<div/>', {
+                'class' : 'chocolat-top'
+            }).appendTo(this.elems.wrapper);
+
+            this.elems.left = $('<div/>', {
+                'class' : 'chocolat-left'
+            }).appendTo(this.elems.wrapper);
+
+            this.elems.right = $('<div/>', {
+                'class' : 'chocolat-right'
+            }).appendTo(this.elems.wrapper);
+
+            this.elems.bottom = $('<div/>', {
+                'class' : 'chocolat-bottom'
+            }).appendTo(this.elems.wrapper);
+
+            this.elems.close = $('<span/>', {
+                'class' : 'chocolat-close'
+            }).appendTo(this.elems.top);
+
+            this.elems.fullscreen = $('<span/>', {
+                'class' : 'chocolat-fullscreen'
+            }).appendTo(this.elems.bottom);
+
+            this.elems.description = $('<span/>', {
+                'class' : 'chocolat-description'
+            }).appendTo(this.elems.bottom);
+
+            this.elems.pagination = $('<span/>', {
+                'class' : 'chocolat-pagination'
+            }).appendTo(this.elems.bottom);
+
+            this.elems.setTitle = $('<span/>', {
+                'class' : 'chocolat-set-title',
+                'html' : this.settings.setTitle
+            }).appendTo(this.elems.bottom);
+
+            this.settings.afterMarkup.call(this);
+        },
+
+        openFullScreen : function() {
+            var wrapper = this.elems.wrapper[0];
+
+            if (wrapper.requestFullscreen) {
+                this.settings.fullscreenOpen = true;
+                wrapper.requestFullscreen();
+            }
+            else if (wrapper.mozRequestFullScreen) {
+                this.settings.fullscreenOpen = true;
+                wrapper.mozRequestFullScreen();
+            }
+            else if (wrapper.webkitRequestFullscreen) {
+                this.settings.fullscreenOpen = true;
+                wrapper.webkitRequestFullscreen();
+            }
+            else if (wrapper.msRequestFullscreen) {
+                wrapper.msRequestFullscreen();
+                this.settings.fullscreenOpen = true;
+            }
+            else {
+                this.settings.fullscreenOpen = false;
+            }
+        },
+
+        exitFullScreen : function() {
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+                this.settings.fullscreenOpen = false;
+            }
+            else if (document.mozCancelFullScreen) {
+                document.mozCancelFullScreen();
+                this.settings.fullscreenOpen = false;
+            }
+            else if (document.webkitExitFullscreen) {
+                document.webkitExitFullscreen();
+                this.settings.fullscreenOpen = false;
+            }
+            else {
+                this.settings.fullscreenOpen = true;
+            }
+        },
+
+        events : function() {
+            var that = this;
+
+            $(document).off('keydown.chocolat').on('keydown.chocolat', function(e) {
+                if (that.settings.initialized) {
+                    if (e.keyCode == 37) {
+                        that.change(-1);
+                    }
+                    else if (e.keyCode == 39) {
+                        that.change(1);
+                    }
+                    else if (e.keyCode == 27) {
+                        that.close();
+                    }
+                }
+            });
+            // this.elems.wrapper.find('.chocolat-img')
+            //     .off('click.chocolat')
+            //     .on('click.chocolat', function(e) {
+            //         var currentImage = that.settings.images[that.settings.currentImage];
+            //         if(currentImage.width > $(that.elems.wrapper).width() || currentImage.height > $(that.elems.wrapper).height() ){
+            //             that.toggleZoom(e);
+            //         }
+            // });
+
+            this.elems.wrapper.find('.chocolat-right')
+                .off('click.chocolat')
+                .on('click.chocolat', function() {
+                    that.change(+1);
+            });
+
+            this.elems.wrapper.find('.chocolat-left')
+                .off('click.chocolat')
+                .on('click.chocolat', function() {
+                    return that.change(-1);
+            });
+
+            $([this.elems.overlay[0], this.elems.close[0]])
+                .off('click.chocolat')
+                .on('click.chocolat', function() {
+                    return that.close();
+            });
+
+            this.elems.fullscreen
+                .off('click.chocolat')
+                .on('click.chocolat', function() {
+                    if (that.settings.fullscreenOpen) {
+                        that.exitFullScreen();
+                        return;
+                    }
+
+                    that.openFullScreen();
+            });
+
+            if (that.settings.backgroundClose) {
+                this.elems.overlay
+                    .off('click.chocolat')
+                    .on('click.chocolat', function() {
+                        return that.close();
+                });
+            }
+            this.elems.wrapper
+                .off('click.chocolat')
+                .on('click.chocolat', function(e) {
+                    return that.zoomOut(e);
+            });
+
+            this.elems.wrapper.find('.chocolat-img')
+                .off('click.chocolat')
+                .on('click.chocolat', function(e) {
+                    if (that.settings.initialZoomState === null && that.elems.domContainer.hasClass('chocolat-zoomable')) {
+                        e.stopPropagation();
+                        return that.zoomIn(e);
+                    }
+            });
+
+            this.elems.wrapper.mousemove(function( e ) {
+                if (that.settings.initialZoomState === null) {
+                    return;
+                }
+                if (that.elems.img.is(':animated')) {
+                    return;
+                }
+
+                var pos = $(this).offset();
+                var height = $(this).height();
+                var width = $(this).width();
+
+                var currentImage = that.settings.images[that.settings.currentImage];
+                var imgWidth = currentImage.width;
+                var imgHeight = currentImage.height;
+
+                var coord = [e.pageX - width/2 - pos.left, e.pageY - height/2 - pos.top];
+
+                var mvtX = 0;
+                if (imgWidth > width) {
+                    var paddingX = that.settings.zoomedPaddingX(imgWidth, width);
+                    mvtX = coord[0] / (width / 2);
+                    mvtX = ((imgWidth - width)/ 2  + paddingX) * mvtX;
+                }
+
+                var mvtY = 0;
+                if (imgHeight > height) {
+                    var paddingY = that.settings.zoomedPaddingY(imgHeight, height);
+                    mvtY = coord[1] / (height / 2);
+                    mvtY = ((imgHeight - height) / 2  + paddingY) * mvtY;
+                }
+
+                var animation = {
+                    'margin-left': - mvtX + 'px',
+                    'margin-top': - mvtY + 'px'
+                };
+                if (typeof e.duration !== 'undefined') {
+                    $(that.elems.img).stop(false, true).animate(animation, e.duration);
+                }
+                else {
+                    $(that.elems.img).stop(false, true).css(animation);
+                }
+
+            });
+            $(window).on('resize', function() {
+                if (!that.settings.initialized) {
+                    return;
+                }
+                that.debounce(50, function() {
+                    var fitting = that.fit(that.settings.currentImage, that.elems.wrapper);
+                    that.center(fitting.width, fitting.height, fitting.left, fitting.top, 0);
+                    that.zoomable();
+                });
+            });
+        },
+
+        zoomable : function () {
+            var currentImage = this.settings.images[this.settings.currentImage];
+            var wrapperWidth = this.elems.wrapper.width();
+            var wrapperHeight = this.elems.wrapper.height();
+
+            var isImageZoomable = ( this.settings.enableZoom && ( currentImage.width > wrapperWidth || currentImage.height > wrapperHeight)) ? true : false;
+            var isImageStretched = this.elems.img.width() > currentImage.width || this.elems.img.height() > currentImage.height;
+
+
+            if (isImageZoomable && !isImageStretched) {
+                this.elems.domContainer.addClass('chocolat-zoomable');
+            }
+            else {
+                this.elems.domContainer.removeClass('chocolat-zoomable');
+            }
+        },
+
+        zoomIn : function (e) {
+            this.settings.initialZoomState = this.settings.imageSize;
+            this.settings.imageSize = 'native';
+
+            var event = $.Event('mousemove');
+            event.pageX = e.pageX;
+            event.pageY = e.pageY;
+            event.duration = this.settings.duration;
+            this.elems.wrapper.trigger(event);
+
+            this.elems.domContainer.addClass('chocolat-zoomed');
+            var fitting = this.fit(this.settings.currentImage, this.elems.wrapper);
+            return this.center(fitting.width, fitting.height, fitting.left, fitting.top, this.settings.duration);
+        },
+
+        zoomOut : function (e, duration) {
+            if (this.settings.initialZoomState === null) {
+                return;
+            }
+            duration = duration || this.settings.duration;
+
+            this.settings.imageSize = this.settings.initialZoomState;
+            this.settings.initialZoomState = null;
+            this.elems.img.animate({'margin': 0}, duration);
+
+            this.elems.domContainer.removeClass('chocolat-zoomed');
+            var fitting = this.fit(this.settings.currentImage, this.elems.wrapper);
+            return this.center(fitting.width, fitting.height, fitting.left, fitting.top, duration);
+        },
+
+        setDomContainer : function() {
+            // if container == window
+            // domContainer = body
+            if ( this.settings.container === window) {
+                this.elems.domContainer = $('body');
+            }
+            else {
+                this.elems.domContainer = $(this.settings.container);
+            }
+        },
+
+        debounce: function(duration, callback) {
+            clearTimeout(this.settings.timerDebounce);
+            this.settings.timerDebounce = setTimeout(function() {
+                callback();
+            }, duration);
+        },
+
+        api: function() {
+            var that = this;
+            return {
+                open : function(i){
+                    i = parseInt(i) || 0;
+                    return that.init(i);
+                },
+
+                close : function(){
+                    return that.close();
+                },
+
+                next : function(){
+                    return that.change(1);
+                },
+
+                prev : function(){
+                    return that.change(-1);
+                },
+
+                goto : function(i){ // open alias
+                    return that.open(i);
+                },
+                current : function(){
+                    return that.settings.currentImage;
+                },
+
+                place : function(){
+                    return that.place(that.settings.currentImage, that.settings.duration);
+                },
+
+                destroy : function(){
+                    return that.destroy();
+                },
+
+                set : function(property, value){
+                    that.settings[property] = value;
+                    return value;
+                },
+
+                get : function(property){
+                    return that.settings[property];
+                },
+
+                getElem : function(name){
+                    return that.elems[name];
+                },
+            };
+        }
+    });
+
+    var defaults = {
+        container         : window, // window or jquery object or jquery selector, or element
+        imageSelector     : '.chocolat-image',
+        className         : '',
+        imageSize         : 'default', // 'default', 'contain', 'cover' or 'native'
+        initialZoomState  : null,
+        fullScreen        : false,
+        loop              : true,
+        linkImages        : true,
+        duration          : 1000,
+        setTitle          : '',
+        separator2        : '/',
+        setIndex          : 0,
+        firstImage        : 0,
+        lastImage         : false,
+        currentImage      : false,
+        initialized       : false,
+        timer             : false,
+        timerDebounce     : false,
+        images            : [],
+        enableZoom        : true,
+        imageSource       : "href",
+        afterInitialize   : function () {},
+        afterMarkup       : function () {},
+        afterImageLoad    : function () {},
+        zoomedPaddingX    : function (canvasWidth, imgWidth) { return 0; },
+        zoomedPaddingY    : function (canvasHeight, imgHeight) { return 0; },
+    };
+
+    $.fn.Chocolat = function (options) {
+        return this.each(function() {
+
+            calls++;
+            var settings = $.extend(true, {}, defaults, options, {setIndex:calls} );
+
+            if (!$.data(this, 'chocolat')) {
+                $.data(this, 'chocolat',
+                    new Chocolat($(this), settings)
+                );
+            }
+        });
+    };
+}));
